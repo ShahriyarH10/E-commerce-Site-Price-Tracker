@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Price Comparison BD</title>
+    <!-- Link to external CSS file -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>E ecomerce site tracker</h1>
+        <p>Compare prices across top Bangladeshi online retailers instantly</p>
+    </header>
+
+    <div class="container">
+        <!-- Search Input -->
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search for products (e.g., iPhone 15, Miniket Rice)..." value="iPhone 15">
+            <button onclick="handleSearch()">Search</button>
+        </div>
+
+        <div class="results-header">
+            <h2 id="resultTitle">Results for "iPhone 15"</h2>
+        </div>
+
+        <!-- Dynamic Results Container -->
+        <div id="resultsContainer"></div>
+    </div>
+
+    <!-- Link to external JS file -->
+    <script src="script.js"></script>
+</body>
+</html>

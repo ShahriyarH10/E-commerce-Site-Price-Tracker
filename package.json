@@ -1,0 +1,17 @@
+{
+  "name": "price-comparison-bd",
+  "version": "1.0.0",
+  "description": "Price comparison across Bangladeshi online retailers",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js"
+  },
+  "dependencies": {
+    "cheerio": "^1.2.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  },
+  "engines": {
+    "node": ">=22.9.0"
+  }
+}
