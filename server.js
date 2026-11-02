@@ -247,27 +247,66 @@ async function scrapeDaraz(query) {
     }
 }
 
+const SOURCES = {
+    startech: scrapeStartech,
+    ryans: searchRyans,
+    daraz: scrapeDaraz,
+    others: searchOtherRetailers
+};
+
+// Lowercases and unifies spellings so "13.6-inch", '13"' and "13 inches" all read as "13.6 inch" / "13 inch"
+const normalize = (text) => text.toLowerCase()
+    .replace(/["”″]/g, ' inch ')
+    .replace(/\binch(es|e)?\b/g, 'inch')
+    .replace(/(\d)([a-z])/g, '$1 $2')
+    .replace(/[^a-z0-9.+]+/g, ' ')
+    .trim();
+
+// Words that mark an add-on rather than the product itself; a result naming one is dropped unless the search names it too
+const ACCESSORY_WORDS = ['case', 'cover', 'sleeve', 'skin', 'protector', 'guard', 'tempered', 'film', 'sticker', 'decal', 'pouch',
+    'bag', 'backpack', 'shell', 'stand', 'holder', 'mount', 'strap', 'hub', 'dock', 'cable', 'charger', 'adapter', 'adaptor',
+    'replacement', 'compatible'];
+
+const startsWord = (text, word) => new RegExp(`(^| )${word.replace(/[.+]/g, '\\$&')}`).test(text);
+
+function matchesQuery(name, searchWords) {
+    const text = normalize(name);
+    if (!searchWords.every(word => startsWord(text, word))) return false;
+    // Searching for an accessory itself ("iphone 15 case") keeps accessories
+    if (searchWords.some(w => ACCESSORY_WORDS.some(word => w.startsWith(word)))) return true;
+    const words = text.split(' ');
+    if (ACCESSORY_WORDS.some(word => words.includes(word) || words.includes(`${word}s`))) return false;
+    // "Charger for MacBook Air" names the device only after "for", which marks an accessory for it
+    const forIndex = text.indexOf(' for ');
+    return forIndex === -1 || startsWord(text.slice(0, forIndex), searchWords[0]);
+}
+
 app.get(['/api/search', '/api/compare'], rateLimit, async (req, res) => {
     const productQuery = (req.query.q || req.query.product || '').trim();
-    
+
     if (!productQuery) {
         return res.status(400).json({ error: 'Please provide a search query parameter.' });
     }
 
-    console.log(`\n🔍 Request received for: "${productQuery}"`);
+    // Without a sites parameter every source is searched
+    const requested = req.query.sites ? String(req.query.sites).split(',') : Object.keys(SOURCES);
+    const sources = requested.filter(site => SOURCES[site]);
+    if (!sources.length) {
+        return res.status(400).json({ error: 'Please select at least one site.' });
+    }
+
+    const searchWords = normalize(productQuery).split(' ');
+    // Stores search better with standard spellings, e.g. "13 inche" becomes "13 inch"
+    const storeQuery = searchWords.join(' ');
+
+    console.log(`\n🔍 Request received for: "${productQuery}" on ${sources.join(', ')}`);
 
     // Only real listings are returned, so every "Go to Store" link opens an actual product page
     // Each source handles its own errors, so one failing store still leaves the others' results
-    let finalResults = (await Promise.all([
-        scrapeStartech(productQuery),
-        searchRyans(productQuery),
-        scrapeDaraz(productQuery),
-        searchOtherRetailers(productQuery)
-    ])).flat();
+    let finalResults = (await Promise.all(sources.map(site => SOURCES[site](storeQuery)))).flat();
 
-    // Stores also return loosely related items (accessories, other models), so keep only names containing every search word
-    const searchWords = productQuery.toLowerCase().split(/\s+/);
-    finalResults = finalResults.filter(item => searchWords.every(word => item.name.toLowerCase().includes(word)));
+    // Stores also return loosely related items (accessories, other models), so keep only the product that was searched for
+    finalResults = finalResults.filter(item => matchesQuery(item.name, searchWords));
 
     console.log(`Found ${finalResults.length} live results.`);
 

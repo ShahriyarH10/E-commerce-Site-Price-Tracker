@@ -17,12 +17,21 @@
     <div class="container">
         <!-- Search Input -->
         <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Search for products (e.g., iPhone 15, Miniket Rice)..." value="iPhone 15">
+            <input type="text" id="searchInput" placeholder="Search for products (e.g., iPhone 15, Miniket Rice)...">
             <button onclick="handleSearch()">Search</button>
         </div>
 
+        <!-- Sites to include in the search -->
+        <div class="site-filter">
+            <span>Search on:</span>
+            <label><input type="checkbox" name="site" value="startech" checked> Star Tech</label>
+            <label><input type="checkbox" name="site" value="ryans" checked> Ryans</label>
+            <label><input type="checkbox" name="site" value="daraz" checked> Daraz</label>
+            <label><input type="checkbox" name="site" value="others" checked> Other BD shops</label>
+        </div>
+
         <div class="results-header">
-            <h2 id="resultTitle">Results for "iPhone 15"</h2>
+            <h2 id="resultTitle"></h2>
         </div>
 
         <!-- Dynamic Results Container -->

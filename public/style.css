@@ -82,6 +82,28 @@ header p {
     background-color: var(--primary-dark);
 }
 
+.site-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.25rem;
+    margin: -1.25rem 0 2rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.site-filter label {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+.site-filter input {
+    accent-color: var(--primary);
+}
+
 /* Results Controls */
 .results-header {
     display: flex;
